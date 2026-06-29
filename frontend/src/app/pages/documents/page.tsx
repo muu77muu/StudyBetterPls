@@ -23,6 +23,9 @@ const cellStyle = {
   padding: "8px",
 };
 
+const imageExtensions = new Set(["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg", "avif", "ico"]);
+
+
 export default function documents() {  
     
     const [loading, setLoading] = useState(true);
@@ -47,6 +50,11 @@ export default function documents() {
         }
     }
 
+    function isValidImage(filename: string) {
+        const ext = filename.split(".").pop()?.toLowerCase();
+        return ext ? imageExtensions.has(ext) : false;
+    }
+
     if (loading) {
         return <p>Loading...</p>;
     }
@@ -59,6 +67,7 @@ export default function documents() {
                 <thead>
                     <tr>
                         <th style={cellStyle}>Name</th>
+                        <th style={cellStyle}>Preview</th>
                         <th style={cellStyle}>Size (bytes)</th>
                         <th style={cellStyle}>Last Modified</th>
                     </tr>
@@ -67,6 +76,12 @@ export default function documents() {
                     {data?.media.filter((file) => file.name).map((file) => (
                         <tr key={file.key}>
                             <td style={cellStyle}>{file.name}</td>
+                            <td style={cellStyle}>
+                                {isValidImage(file.name) && (
+                                    <img src={`/api/${file.key}`} 
+                                    alt={file.name} style={{ maxWidth: "100px", maxHeight: "100px" }} />
+                                )}
+                            </td>
                             <td style={cellStyle}>{file.size}</td>
                             <td style={cellStyle}>{file.last_modified}</td>
                         </tr>
