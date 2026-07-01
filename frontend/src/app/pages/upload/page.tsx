@@ -29,9 +29,14 @@ export default function upload() {
         <main>
             <h1>Upload</h1>
             <input type="file" onChange={(e) => {
-                if (e.target.files) {
-                    setFile(e.target.files[0]);
+                if (!e.target.files) return;
+                const selectedFile = e.target.files[0];
+                
+                if (selectedFile.size > 20 * 1024 * 1024) { // 10MB limit
+                    alert("File size exceeds 20MB limit.");
+                    return;
                 }
+                setFile(selectedFile);
             }} />
             <button onClick={handleUpload}>Upload</button>
         </main>
