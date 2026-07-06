@@ -9,3 +9,6 @@ bcrypt
 pydantic-settings
 boto3
 python-dotenv
+pyjwt
+cryptography
+httpx

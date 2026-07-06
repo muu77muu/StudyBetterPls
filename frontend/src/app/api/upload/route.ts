@@ -1,25 +1,32 @@
 import { NextResponse } from "next/server";
 
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000/api/upload";
+
 export async function POST(req: Request) {
-
-  const formData = await req.formData();
-  const file = formData.get("file");
-
-  if (!file) {
+  try {
+    const formData = await req.formData();
+    const authorization = req.headers.get("Authorization");
+  
+    const response = await fetch(
+      BACKEND_URL,
+      {
+        method: "POST",
+        body: formData,
+        headers: {
+          Authorization: authorization || "",
+        },
+      }
+    );
+  
+    const data = await response.json();
+    return NextResponse.json(data, {
+      status: response.status,
+    });
+  } catch (error) {
+    console.error("Error uploading file:", error);
     return NextResponse.json(
-      { error: "No file" },
-      { status: 400 }
+      { error: "Failed to upload file" },
+      { status: 500 }
     );
   }
-
-  const response = await fetch(
-    "http://localhost:8000/api/upload",
-    {
-      method: "POST",
-      body: formData,
-    }
-  );
-
-  const data = await response.json();
-  return NextResponse.json(data);
 }
