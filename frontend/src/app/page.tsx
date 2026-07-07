@@ -1,12 +1,23 @@
-import Link from "next/link";
+import { auth } from "@clerk/nextjs/server";
+import { SignIn } from "@clerk/nextjs";
+import { redirect } from "next/navigation";
+import "./globals.css";
 
-export default function Home() {
+export default async function Home() {
+  const { userId } = await auth();
+
+  if (userId) {
+    redirect("/pages/dashboard");
+  }
+
   return (
-    <main>
-      <Link href="/pages/dashboard">Go to Dashboard</Link><br></br>
-      <Link href="/pages/documents">Go to Documents</Link><br></br>
-      <Link href="/pages/settings">Go to Settings</Link><br></br>
-      <Link href="/pages/upload">Go to Upload</Link>
+    <main className="landing-page">
+      <div className="login-card">
+        <h1>StudyBetter</h1>
+        <p>Sign in to continue.</p>
+
+        <SignIn />
+      </div>
     </main>
   );
 }
