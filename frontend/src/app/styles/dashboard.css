@@ -1,18 +1,15 @@
 .dashboard {
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #f5f7fb;
+  min-height: calc(100vh - 72px);
+  background: #f3f6fb;
+  padding: 48px;
 }
 
 .dashboard-card {
-  width: 600px;
-  max-width: 90%;
+  max-width: 900px;
   background: white;
-  padding: 2rem;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  padding: 40px;
+  border-radius: 18px;
+  box-shadow: 0 10px 35px rgba(0,0,0,.08);
 }
 
 .dashboard-card h1 {

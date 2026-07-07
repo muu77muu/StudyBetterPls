@@ -17,8 +17,10 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body>
-          <Header />
-          {children}
+          <div className="app-layout">
+            <Header />
+            <main className="page-content">{children}</main>
+          </div>
         </body>
       </html>
     </ClerkProvider>
