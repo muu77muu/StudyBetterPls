@@ -12,3 +12,5 @@ python-dotenv
 pyjwt
 cryptography
 httpx
+svix
+ngrok
