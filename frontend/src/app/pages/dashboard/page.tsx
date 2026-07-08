@@ -1,10 +1,12 @@
-import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import "@/app/styles/dashboard.css";
 
+import { redirect } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
+
+
 const pages = [
-  {
+  { 
     title: "Documents",
     icon: "📄",
     href: "/pages/documents",
@@ -39,7 +41,7 @@ export default async function DashboardPage() {
   const { userId } = await auth();
 
   if (!userId) {
-    redirect("/");
+    redirect("/login");
   }
 
   return (

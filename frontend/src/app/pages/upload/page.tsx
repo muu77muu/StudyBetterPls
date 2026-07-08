@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useAuth } from "@clerk/nextjs";
 import error from "next/dist/api/error";
 
 const MAX_FILE_SIZE_MB = 20; // 20MB limit

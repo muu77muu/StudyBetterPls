@@ -2,68 +2,73 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useAuth, useClerk } from "@clerk/nextjs";
+import { UserButton, useAuth } from "@clerk/nextjs";
 import "@/app/styles/header.css";
 
 export default function Header() {
-  const { isSignedIn } = useAuth();
-  const { signOut } = useClerk();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { isSignedIn } = useAuth();
 
-  if (!isSignedIn) return null;
-
-  const handleSignOut = async () => {
-    await signOut({
-      redirectUrl: "/sign-in",
-    });
-  };
+  if (!isSignedIn) {
+    return null;
+  }
 
   return (
     <header className="header">
       <div className="header-container">
-        <Link href="/pages/dashboard" className="logo">
+        <Link
+          href="/pages/dashboard"
+          className="logo"
+          onClick={() => setMenuOpen(false)}
+        >
           StudyBetter
         </Link>
 
         <button
           className="menu-button"
-          onClick={() => setMenuOpen(!menuOpen)}
+          onClick={() => setMenuOpen((open) => !open)}
           aria-label="Toggle navigation"
         >
           ☰
         </button>
 
         <nav className={`nav-links ${menuOpen ? "open" : ""}`}>
-          <Link href="/pages/dashboard" onClick={() => setMenuOpen(false)}>
+          <Link
+            href="/pages/dashboard"
+            onClick={() => setMenuOpen(false)}
+          >
             Dashboard
           </Link>
 
-          <Link href="/pages/documents" onClick={() => setMenuOpen(false)}>
+          <Link
+            href="/pages/documents"
+            onClick={() => setMenuOpen(false)}
+          >
             Documents
           </Link>
 
-          <Link href="/pages/upload" onClick={() => setMenuOpen(false)}>
+          <Link
+            href="/pages/upload"
+            onClick={() => setMenuOpen(false)}
+          >
             Upload
           </Link>
 
-          <Link href="/pages/settings" onClick={() => setMenuOpen(false)}>
+          <Link
+            href="/pages/settings"
+            onClick={() => setMenuOpen(false)}
+          >
             Settings
           </Link>
 
-          <button
-            className="signout-btn mobile-only"
-            onClick={handleSignOut}
-          >
-            Sign Out
-          </button>
+          <div className="mobile-only">
+            <UserButton />
+          </div>
         </nav>
 
-        <button
-          className="signout-btn desktop-only"
-          onClick={handleSignOut}
-        >
-          Sign Out
-        </button>
+        <div className="desktop-only">
+          <UserButton />
+        </div>
       </div>
     </header>
   );

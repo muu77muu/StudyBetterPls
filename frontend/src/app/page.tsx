@@ -1,18 +1,17 @@
-export const dynamic = "force-dynamic";
+import Link from "next/link";
+import { Show, UserButton } from "@clerk/nextjs";
 
-import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
+export default function HomePage() {
+  return (
+    <main>
+      <Show when="signed-out">
+        <Link href="/pages/login">Login</Link>
+      </Show>
 
-export default async function Home() {
-  console.log("HOME PAGE EXECUTED");
-
-  const { userId } = await auth();
-
-  console.log({ userId });
-
-  if (userId) {
-    redirect("/pages/dashboard");
-  }
-
-  redirect("/sign-in");
+      <Show when="signed-in">
+        <UserButton />
+        <Link href="/pages/dashboard">Dashboard</Link>
+      </Show>
+    </main>
+  );
 }

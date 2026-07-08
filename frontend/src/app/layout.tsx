@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
-import { ClerkProvider } from "@clerk/nextjs";
 import Header from "@/app/components/Header";
 import "./globals.css";
+
+import type { Metadata } from "next";
+import { ClerkProvider } from "@clerk/nextjs";
 
 export const metadata: Metadata = {
   title: "StudyBetter",
@@ -14,7 +15,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      signInUrl="/pages/login"
+      signUpUrl="/pages/signup"
+      afterSignOutUrl="/pages/login"
+    >
       <html lang="en">
         <body>
           <div className="app-layout">
