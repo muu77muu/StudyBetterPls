@@ -2,17 +2,22 @@ from fastapi import Header, HTTPException
 
 from app.auth.clerk import verify_token
 
-async def get_current_user(authorization: str = Header(...),):
+def get_current_user(authorization: str = Header(...)):
     if not authorization.startswith("Bearer "):
-        raise HTTPException(401)
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid authorization header"
+        )
 
-    token = authorization[7:]
+    token = authorization.split(" ")[1]
 
     try:
-        return verify_token(token)
+        payload = verify_token(token)
 
     except Exception:
         raise HTTPException(
             status_code=401,
-            detail="Invalid token",
+            detail="Invalid token"
         )
+
+    return { "id": payload["sub"] }

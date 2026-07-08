@@ -1,30 +1,76 @@
-from http.client import HTTPException
+from unittest import result
+from uuid import uuid4
 
-from app.storage.r2 import r2, BUCKET
+from fastapi import HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
 
-async def upload_file(file):
+from app.storage.r2 import (get_r2_client, BUCKET)
+from backend.app.models.file import FileMetadata
 
-    key = f"media/{file.filename}"
+MAX_FILE_SIZE = 20 * 1024 * 1024  # 20MB
 
-    print("Bucket:", BUCKET)
-    print("Key:", key)
+async def delete_r2_object(key: str):
+    async with get_r2_client() as s3:
+        await s3.delete_object(
+            Bucket=BUCKET,
+            Key=key,
+        )
 
-    MAX_FILE_SIZE = 20 * 1024 * 1024  # 20MB
+async def upload_file(file, clerk_user_id: str, db: AsyncSession):
+
     contents = await file.read()
     if len(contents) > MAX_FILE_SIZE:
-        raise HTTPException(status_code=413, detail="File size exceeds 20MB limit.")
+        raise HTTPException(
+            status_code=413,
+            detail="File size exceeds 20MB limit."
+        )
     file.file.seek(0)
 
-    try:
-        r2.upload_fileobj(
-            file.file,
-            BUCKET,
-            key,
-            ExtraArgs={"ContentType": file.content_type},
-        )
-        print("upload completed: ", key)
-        
-    except Exception as e:
-        raise Exception(f"Failed to upload file: {str(e)}")
+    safe_filename = file.filename.replace("/", "_")
+    key = (
+        f"users/"
+        f"{clerk_user_id}/"
+        f"media/"
+        f"{uuid4()}-{safe_filename}"
+    )
 
-    return key
+    try:
+        async with get_r2_client() as s3_client:
+            await s3_client.upload_fileobj(
+                file.file,
+                BUCKET,
+                key,
+                ExtraArgs={
+                    "ContentType": file.content_type
+                },
+            )
+        
+        transacted_with_r2 = True
+
+        metadata = FileMetadata(
+            id=str(uuid4()),
+            clerk_user_id=clerk_user_id,
+            filename=file.filename,
+            r2_key=key,
+            content_type=file.content_type,
+            size=len(contents),
+        )
+
+        db.add(metadata)
+        await db.commit()
+        await db.refresh(metadata)
+        return metadata
+    
+    except Exception as e:
+        await db.rollback()
+
+        if transacted_with_r2:
+            try:
+                await delete_r2_object(key)
+            except Exception as delete_error:
+                print(f"Failed to delete R2 object: {str(delete_error)}")
+
+        raise Exception(
+            f"Failed to upload file: {str(e)}"
+        )
+

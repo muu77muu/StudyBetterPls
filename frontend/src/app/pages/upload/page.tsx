@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import error from "next/dist/api/error";
+import { useAuth } from "@clerk/nextjs";
 
 const MAX_FILE_SIZE_MB = 20; // 20MB limit
 
 export default function upload() {  
-    const { getToken } = useAuth();
+    const { getToken, userId } = useAuth();
     
     const [file, setFile] = useState<File | null>(null);
     const [uploading, setUploading] = useState(false);

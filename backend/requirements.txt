@@ -7,9 +7,10 @@ python-jose
 passlib
 bcrypt
 pydantic-settings
-boto3
+aioboto3
 python-dotenv
 clerk-backend-api
 pyjwt
 cryptography
 httpx
+asyncpg
