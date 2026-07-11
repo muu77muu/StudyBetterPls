@@ -3,7 +3,7 @@ from app.services.document_service import list_media, list_notes
 
 router = APIRouter()
 
-@router.get("/api/documents")
+@router.get("/documents")
 async def get_documents():
     return {
         "media": list_media(),
