@@ -1,11 +1,10 @@
-from unittest import result
 from uuid import uuid4
 
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.storage.r2 import (get_r2_client, BUCKET)
-from backend.app.models.file import FileMetadata
+from app.models.file import FileMetadata
 
 MAX_FILE_SIZE = 20 * 1024 * 1024  # 20MB
 
@@ -24,7 +23,8 @@ async def upload_file(file, clerk_user_id: str, db: AsyncSession):
             status_code=413,
             detail="File size exceeds 20MB limit."
         )
-    file.file.seek(0)
+    
+    await file.seek(0) # reset the file pointer to the beginning
 
     safe_filename = file.filename.replace("/", "_")
     key = (
@@ -34,9 +34,11 @@ async def upload_file(file, clerk_user_id: str, db: AsyncSession):
         f"{uuid4()}-{safe_filename}"
     )
 
+    uploaded_to_r2 = False
+
     try:
-        async with get_r2_client() as s3_client:
-            await s3_client.upload_fileobj(
+        async with get_r2_client() as s3:
+            await s3.upload_fileobj(
                 file.file,
                 BUCKET,
                 key,
@@ -45,7 +47,7 @@ async def upload_file(file, clerk_user_id: str, db: AsyncSession):
                 },
             )
         
-        transacted_with_r2 = True
+        uploaded_to_r2 = True
 
         metadata = FileMetadata(
             id=str(uuid4()),
@@ -59,14 +61,16 @@ async def upload_file(file, clerk_user_id: str, db: AsyncSession):
         db.add(metadata)
         await db.commit()
         await db.refresh(metadata)
+
         return metadata
     
     except Exception as e:
         await db.rollback()
 
-        if transacted_with_r2:
+        if uploaded_to_r2:
             try:
                 await delete_r2_object(key)
+                
             except Exception as delete_error:
                 print(f"Failed to delete R2 object: {str(delete_error)}")
 

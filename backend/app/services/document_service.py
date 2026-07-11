@@ -1,35 +1,35 @@
-from app.storage.r2 import r2, BUCKET
+from app.storage.r2 import BUCKET, get_r2_client
 
-def list_media():
-
-    try:
-        response = r2.list_objects_v2(Bucket=BUCKET, Prefix="media/")
-        media_files = []
-        for obj in response.get('Contents', []):
-            media_files.append({
-                "key": obj['Key'],
-                "name": obj['Key'].replace("media/", ""),
-                "size": obj['Size'],
-                "last_modified": obj['LastModified'].isoformat(),
-            })
-        return media_files
+async def list_media():
+    async with get_r2_client() as r2:
+        try:
+            response = await r2.list_objects_v2(Bucket=BUCKET, Prefix="media/")
+            media_files = []
+            for obj in response.get('Contents', []):
+                media_files.append({
+                    "key": obj['Key'],
+                    "name": obj['Key'].replace("media/", ""),
+                    "size": obj['Size'],
+                    "last_modified": obj['LastModified'].isoformat(),
+                })
+            return media_files
+        
+        except Exception as e:
+            raise Exception(f"Failed to list media: {str(e)}")
     
-    except Exception as e:
-        raise Exception(f"Failed to list media: {str(e)}")
-    
-def list_notes():
-
-    try:
-        response = r2.list_objects_v2(Bucket=BUCKET, Prefix="notes/")
-        notes = []
-        for obj in response.get('Contents', []):
-            notes.append({
+async def list_notes():
+    async with get_r2_client() as r2:
+        try:
+            response = await r2.list_objects_v2(Bucket=BUCKET, Prefix="notes/")
+            notes = []
+            for obj in response.get('Contents', []):
+                notes.append({
                 "key": obj['Key'],
                 "name": obj['Key'].replace("notes/", ""),
                 "size": obj['Size'],
                 "last_modified": obj['LastModified'].isoformat(),
             })
-        return notes
+            return notes
     
-    except Exception as e:
-        raise Exception(f"Failed to list notes: {str(e)}")
+        except Exception as e:
+            raise Exception(f"Failed to list notes: {str(e)}")

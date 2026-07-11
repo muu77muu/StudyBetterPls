@@ -12,8 +12,8 @@ async def get_r2_client():
     return R2_SESSION.client(
         "s3",
         endpoint_url=os.environ.get("S3_API_ENDPOINT"),
-        db_access_key_id=os.environ.get("R2_ACCESS_KEY_ID"),
-        db_secret_access_key=os.environ.get("R2_SECRET_KEY"),
+        aws_access_key_id=os.environ.get("R2_ACCESS_KEY_ID"),
+        aws_secret_access_key=os.environ.get("R2_SECRET_KEY"),
         region_name="auto",
     )
     

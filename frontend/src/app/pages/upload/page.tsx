@@ -34,16 +34,20 @@ export default function upload() {
                 },
             });
 
+            const data = await response.json();
+
             if (!response.ok) {
-                throw new Error("Upload failed");
+                throw new Error(data.detail || data.error || "Upload failed");
             }
 
-            const data = await response.json();
-            setMessage(`File uploaded successfully: ${data.fileName}`);
-        } catch (e) {
-            const error = e instanceof Error ? e : new Error("Unknown error");
-            console.error("Upload failed:", error);
-            setMessage("File upload failed.");
+            setMessage(`Uploaded successfully!\nFile ID: ${data.file_id}`);
+
+        } catch (err) {
+            if (err instanceof Error) {
+                setMessage(err.message);
+            } else {
+                setMessage("Upload failed.");
+            }
         } finally {
             setUploading(false);
         }
