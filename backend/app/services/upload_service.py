@@ -17,15 +17,14 @@ async def delete_r2_object(key: str):
 
 async def upload_file(file, clerk_user_id: str, db: AsyncSession):
 
-    contents = await file.read()
-    if len(contents) > MAX_FILE_SIZE:
+    if file.size > MAX_FILE_SIZE:
         raise HTTPException(
             status_code=413,
             detail="File size exceeds 20MB limit."
         )
     
-    await file.seek(0) # reset the file pointer to the beginning
-
+    contents = await file.read()
+    
     safe_filename = file.filename.replace("/", "_")
     key = (
         f"users/"
@@ -37,14 +36,12 @@ async def upload_file(file, clerk_user_id: str, db: AsyncSession):
     uploaded_to_r2 = False
 
     try:
-        async with get_r2_client() as s3:
-            await s3.upload_fileobj(
-                file.file,
-                BUCKET,
-                key,
-                ExtraArgs={
-                    "ContentType": file.content_type
-                },
+        async with (await get_r2_client()) as s3:
+            await s3.put_object(
+                Body=file.file,
+                Bucket=BUCKET,
+                Key=key,
+                ContentType=file.content_type,
             )
         
         uploaded_to_r2 = True
@@ -74,7 +71,4 @@ async def upload_file(file, clerk_user_id: str, db: AsyncSession):
             except Exception as delete_error:
                 print(f"Failed to delete R2 object: {str(delete_error)}")
 
-        raise Exception(
-            f"Failed to upload file: {str(e)}"
-        )
-
+        raise Exception(f"Failed to upload file: {str(e)}")

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const response = await fetch("http://localhost:8000/api/documents", {
+  const response = await fetch(`${process.env.BACKEND_URL}/documents`, {
     method: "GET",
   });
 
