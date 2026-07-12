@@ -13,11 +13,6 @@ export default function upload() {
     const [message, setMessage] = useState("");
 
     async function handleUpload() {
-        const token = await getToken();
-        console.log("User ID:", userId);
-        console.log("Token:", token);
-        
-        
         if (!file) {
             setMessage("Please select a file to upload.");
             return;

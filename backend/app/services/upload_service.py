@@ -4,7 +4,7 @@ from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.storage.r2 import (get_r2_client, BUCKET)
-from app.models.file import FileMetadata
+from app.models.filemetadata_model import FileMetadata
 
 MAX_FILE_SIZE = 20 * 1024 * 1024  # 20MB
 
@@ -24,6 +24,7 @@ async def upload_file(file, clerk_user_id: str, db: AsyncSession):
         )
     
     contents = await file.read()
+    await file.seek(0)  # Reset the file pointer to the beginning after reading
     
     safe_filename = file.filename.replace("/", "_")
     key = (
