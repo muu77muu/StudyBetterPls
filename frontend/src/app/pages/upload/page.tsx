@@ -32,6 +32,7 @@ export default function UploadPage() {
             const token = await getToken();
             const formData = new FormData();
             formData.append("file", file);
+            formData.append("type", type);
 
             const response = await fetch("/api/upload", {
                 method: "POST",
@@ -93,11 +94,9 @@ export default function UploadPage() {
             </section>
 
             <section className="upload-grid">
-                {/* ================= MEDIA ================= */}
                 <div className="upload-card">
                     <div className="upload-card-header">
                         <div className="upload-icon">📹</div>
-
                         <div>
                             <h2>Media</h2>
                             <p>
@@ -115,7 +114,6 @@ export default function UploadPage() {
                             if (!e.target.files) return;
 
                             const selectedFile = e.target.files[0];
-
                             if (
                                 selectedFile.size >
                                 MAX_FILE_SIZE_MB * 1024 * 1024
@@ -144,7 +142,6 @@ export default function UploadPage() {
                         {mediaFile ? (
                             <>
                                 <strong>{mediaFile.name}</strong>
-
                                 <span>
                                     {(mediaFile.size / 1024 / 1024).toFixed(2)} MB
                                 </span>
@@ -167,12 +164,9 @@ export default function UploadPage() {
                     </button>
                 </div>
 
-                {/* ================= NOTES ================= */}
-
                 <div className="upload-card">
                     <div className="upload-card-header">
                         <div className="upload-icon">📝</div>
-
                         <div>
                             <h2>Notes</h2>
                             <p>
@@ -204,7 +198,6 @@ export default function UploadPage() {
                         {notesFile ? (
                             <>
                                 <strong>{notesFile.name}</strong>
-
                                 <span>
                                     {(notesFile.size / 1024 / 1024).toFixed(2)} MB
                                 </span>

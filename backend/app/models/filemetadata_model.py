@@ -15,7 +15,9 @@ class FileMetadata(Base):
     filename: Mapped[str] = mapped_column(String, nullable=False)
     r2_key: Mapped[str] = mapped_column(String, nullable=False)
     content_type: Mapped[str | None] = mapped_column(String)
+    compression: Mapped[str | None] = mapped_column(String)
     size: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    file_type: Mapped[str] = mapped_column(String, nullable=False, server_default='media')
 
     created_at: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True),

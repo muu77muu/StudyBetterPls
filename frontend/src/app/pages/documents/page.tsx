@@ -78,7 +78,7 @@ export default function documents() {
                             <td style={cellStyle}>{file.name}</td>
                             <td style={cellStyle}>
                                 {isValidImage(file.name) && (
-                                    <img src={`/api/media/${file.key}`} 
+                                    <img src={`/api/upload/media/${file.key}`} 
                                     alt={file.name} style={{ maxWidth: "100px", maxHeight: "100px" }} />
                                 )}
                             </td>
