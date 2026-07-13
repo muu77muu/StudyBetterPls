@@ -15,4 +15,3 @@ async def get_r2_client():
         aws_secret_access_key=os.environ.get("R2_SECRET_KEY"),
         region_name="auto",
     )
-    

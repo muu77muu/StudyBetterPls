@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react";
 
 type File = {
-    key: string;
-    name: string;
+    id: string;
+    filename: string;
     size: number;
-    last_modified: string;
-}
+    content_type: string;
+    created_at: string;
+};
 
 type DocumentResponse = {
     media: File[];
@@ -73,17 +74,31 @@ export default function documents() {
                     </tr>
                 </thead>
                 <tbody>
-                    {data?.media.filter((file) => file.name).map((file) => (
-                        <tr key={file.key}>
-                            <td style={cellStyle}>{file.name}</td>
+                    {data?.media.filter((file) => file.filename).map((file) => (
+                        <tr key={file.id}>
                             <td style={cellStyle}>
-                                {isValidImage(file.name) && (
-                                    <img src={`/api/upload/media/${file.key}`} 
-                                    alt={file.name} style={{ maxWidth: "100px", maxHeight: "100px" }} />
+                                <a
+                                    href={`/api/documents/${file.id}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    {file.filename}
+                                </a>
+                            </td>
+                            <td style={cellStyle}>
+                                {isValidImage(file.filename) && (
+                                    <img
+                                        src={`/api/documents/${file.id}`}
+                                        alt={file.filename}
+                                        style={{
+                                            maxWidth: "100px",
+                                            maxHeight: "100px",
+                                        }}
+                                    />
                                 )}
                             </td>
                             <td style={cellStyle}>{file.size}</td>
-                            <td style={cellStyle}>{file.last_modified}</td>
+                            <td style={cellStyle}>{file.created_at}</td>
                         </tr>
                     ))}
                 </tbody>
@@ -99,11 +114,19 @@ export default function documents() {
                     </tr>
                 </thead>
                 <tbody>
-                    {data?.notes.filter((file) => file.name).map((file) => (
-                        <tr key={file.key}>
-                            <td style={cellStyle}>{file.name}</td>
+                    {data?.notes.filter((file) => file.filename).map((file) => (
+                        <tr key={file.id}>
+                            <td style={cellStyle}>
+                                <a
+                                    href={`/api/documents/${file.id}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    {file.filename}
+                                </a>
+                            </td>
                             <td style={cellStyle}>{file.size}</td>
-                            <td style={cellStyle}>{file.last_modified}</td>
+                            <td style={cellStyle}>{file.created_at}</td>
                         </tr>
                     ))}
                 </tbody>
