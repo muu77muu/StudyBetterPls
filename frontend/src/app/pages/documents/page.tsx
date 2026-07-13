@@ -65,11 +65,10 @@ export default function DocumentsPage() {
     if (bytes === 0) return "0 B";
 
     const k = 1024;
-    const sizes = ["B", "KB", "MB", "GB", "TB"];
-
+    const sizes = ["B", "KB", "MB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
   }
 
   function formatDate(date: string) {
@@ -96,13 +95,11 @@ export default function DocumentsPage() {
 
   return (
     <main className="documents">
-      {/* Hero */}
       <section className="hero">
         <h1>📄 Documents</h1>
         <p>Browse, preview and download your uploaded study materials.</p>
       </section>
 
-      {/* Stats */}
       <section className="stats-grid">
         <div className="stat-card">
           <h2>{data.media.length}</h2>
@@ -120,7 +117,6 @@ export default function DocumentsPage() {
         </div>
       </section>
 
-      {/* MEDIA */}
       <section className="document-section">
         <div className="section-header">
           <h2>🖼 Media</h2>
@@ -173,7 +169,6 @@ export default function DocumentsPage() {
         )}
       </section>
 
-      {/* NOTES */}
       <section className="document-section">
         <div className="section-header">
           <h2>📝 Notes</h2>
