@@ -1,136 +1,223 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import "@/app/styles/documents.css";
 
-type File = {
-    id: string;
-    filename: string;
-    size: number;
-    content_type: string;
-    created_at: string;
+type DocumentFile = {
+  id: string;
+  filename: string;
+  size: number;
+  content_type: string;
+  created_at: string;
 };
 
 type DocumentResponse = {
-    media: File[];
-    notes: File[];
-}
-
-const tableStyle = {
-  borderCollapse: "collapse" as const,
+  media: DocumentFile[];
+  notes: DocumentFile[];
 };
 
-const cellStyle = {
-  border: "1px solid black",
-  padding: "8px",
-};
+const imageExtensions = new Set([
+  "jpg",
+  "jpeg",
+  "png",
+  "gif",
+  "webp",
+  "bmp",
+  "svg",
+  "avif",
+  "ico",
+]);
 
-const imageExtensions = new Set(["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg", "avif", "ico"]);
+export default function DocumentsPage() {
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<DocumentResponse>({
+    media: [],
+    notes: [],
+  });
 
+  useEffect(() => {
+    fetchDocuments();
+  }, []);
 
-export default function documents() {  
-    
-    const [loading, setLoading] = useState(true);
-    const [data, setData] = useState<DocumentResponse | null>(null);
+  async function fetchDocuments() {
+    try {
+      const response = await fetch("/api/documents");
 
+      if (!response.ok) {
+        throw new Error("Failed to fetch documents");
+      }
 
-    useEffect(() => {
-        handleDocuments();
-    }, []);
-
-    async function handleDocuments() {
-        try {
-            const response = await fetch("/api/documents", {
-                method: "GET",
-            });
-            const res = await response.json();
-            setData(res);
-        } catch (error) {
-            console.error("Error fetching documents:", error);
-        } finally {
-            setLoading(false);
-        }
+      const result = await response.json();
+      setData(result);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
+  }
 
-    function isValidImage(filename: string) {
-        const ext = filename.split(".").pop()?.toLowerCase();
-        return ext ? imageExtensions.has(ext) : false;
-    }
+  function isValidImage(filename: string) {
+    const ext = filename.split(".").pop()?.toLowerCase();
+    return ext ? imageExtensions.has(ext) : false;
+  }
 
-    if (loading) {
-        return <p>Loading...</p>;
-    }
+  function formatBytes(bytes: number) {
+    if (bytes === 0) return "0 B";
 
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB", "TB"];
+
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
+  }
+
+  function formatDate(date: string) {
+    return new Intl.DateTimeFormat("en-SG", {
+      timeZone: "Asia/Singapore",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    }).format(new Date(date));
+  }
+
+  if (loading) {
     return (
-        <main>
-            <h1>Documents</h1>
-            <h3>Media</h3>
-            <table border={1} cellPadding={8} style={tableStyle}> 
-                <thead>
-                    <tr>
-                        <th style={cellStyle}>Name</th>
-                        <th style={cellStyle}>Preview</th>
-                        <th style={cellStyle}>Size (bytes)</th>
-                        <th style={cellStyle}>Last Modified</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {data?.media.filter((file) => file.filename).map((file) => (
-                        <tr key={file.id}>
-                            <td style={cellStyle}>
-                                <a
-                                    href={`/api/documents/${file.id}`}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                >
-                                    {file.filename}
-                                </a>
-                            </td>
-                            <td style={cellStyle}>
-                                {isValidImage(file.filename) && (
-                                    <img
-                                        src={`/api/documents/${file.id}`}
-                                        alt={file.filename}
-                                        style={{
-                                            maxWidth: "100px",
-                                            maxHeight: "100px",
-                                        }}
-                                    />
-                                )}
-                            </td>
-                            <td style={cellStyle}>{file.size}</td>
-                            <td style={cellStyle}>{file.created_at}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-
-            <h3>Notes</h3>
-            <table border={3} cellPadding={8} style={tableStyle}>
-                <thead>
-                    <tr>
-                        <th style={cellStyle}>Name</th>
-                        <th style={cellStyle}>Size (bytes)</th>
-                        <th style={cellStyle}>Last Modified</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {data?.notes.filter((file) => file.filename).map((file) => (
-                        <tr key={file.id}>
-                            <td style={cellStyle}>
-                                <a
-                                    href={`/api/documents/${file.id}`}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                >
-                                    {file.filename}
-                                </a>
-                            </td>
-                            <td style={cellStyle}>{file.size}</td>
-                            <td style={cellStyle}>{file.created_at}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </main>
+      <main className="documents">
+        <div className="loading-state">
+          <h2>Loading documents...</h2>
+        </div>
+      </main>
     );
+  }
+
+  return (
+    <main className="documents">
+      {/* Hero */}
+      <section className="hero">
+        <h1>📄 Documents</h1>
+        <p>Browse, preview and download your uploaded study materials.</p>
+      </section>
+
+      {/* Stats */}
+      <section className="stats-grid">
+        <div className="stat-card">
+          <h2>{data.media.length}</h2>
+          <p>Media Files</p>
+        </div>
+
+        <div className="stat-card">
+          <h2>{data.notes.length}</h2>
+          <p>Notes</p>
+        </div>
+
+        <div className="stat-card">
+          <h2>{data.media.length + data.notes.length}</h2>
+          <p>Total Documents</p>
+        </div>
+      </section>
+
+      {/* MEDIA */}
+      <section className="document-section">
+        <div className="section-header">
+          <h2>🖼 Media</h2>
+          <span>{data.media.length} files</span>
+        </div>
+
+        {data.media.length === 0 ? (
+          <div className="empty-state">
+            <h3>No media uploaded</h3>
+            <p>Your uploaded images will appear here.</p>
+          </div>
+        ) : (
+          <div className="document-grid">
+            {data.media
+              .filter((file) => file.filename)
+              .map((file) => (
+                <div className="document-card" key={file.id}>
+                  <div className="preview">
+                    {isValidImage(file.filename) ? (
+                      <img
+                        src={`/api/documents/${file.id}`}
+                        alt={file.filename}
+                      />
+                    ) : (
+                      <div className="file-icon">📄</div>
+                    )}
+                  </div>
+
+                  <div className="document-info">
+                    <h3>{file.filename}</h3>
+
+                    <div className="meta">
+                      <span>{formatBytes(file.size)}</span>
+                      <span>•</span>
+                      <span>{formatDate(file.created_at)}</span>
+                    </div>
+                  </div>
+
+                  <a
+                    href={`/api/documents/${file.id}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="open-button"
+                  >
+                    Open →
+                  </a>
+                </div>
+              ))}
+          </div>
+        )}
+      </section>
+
+      {/* NOTES */}
+      <section className="document-section">
+        <div className="section-header">
+          <h2>📝 Notes</h2>
+          <span>{data.notes.length} files</span>
+        </div>
+
+        {data.notes.length === 0 ? (
+          <div className="empty-state">
+            <h3>No notes uploaded</h3>
+            <p>Your PDFs and notes will appear here.</p>
+          </div>
+        ) : (
+          <div className="document-grid">
+            {data.notes
+              .filter((file) => file.filename)
+              .map((file) => (
+                <div className="document-card" key={file.id}>
+                  <div className="preview">
+                    <div className="file-icon">📄</div>
+                  </div>
+
+                  <div className="document-info">
+                    <h3>{file.filename}</h3>
+
+                    <div className="meta">
+                      <span>{formatBytes(file.size)}</span>
+                      <span>•</span>
+                      <span>{formatDate(file.created_at)}</span>
+                    </div>
+                  </div>
+
+                  <a
+                    href={`/api/documents/${file.id}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="open-button"
+                  >
+                    Open →
+                  </a>
+                </div>
+              ))}
+          </div>
+        )}
+      </section>
+    </main>
+  );
 }
