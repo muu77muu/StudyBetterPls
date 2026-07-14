@@ -38,3 +38,21 @@ export async function GET(
     },
   });
 }
+
+export async function DELETE(
+  request: Request, 
+  { params }: { params: Promise<{ id: string }>}
+) {
+  const { id } = await params;
+  const { getToken } = await auth();
+  const token = await getToken();
+
+  const response = await fetch(`${BACKEND}/documents/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  return new NextResponse(null, {
+    status: response.status,
+  });
+}

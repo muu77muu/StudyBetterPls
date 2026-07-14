@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.user_dependency import get_current_user
 from app.database.database import get_db
-from app.services.document_service import get_document, list_media, list_notes
+from app.services.document_service import get_document, list_media, list_notes, delete_document
 
 router = APIRouter()
 
@@ -25,3 +25,8 @@ async def download_document(file_id: str, user=Depends(get_current_user), db: As
         media_type=metadata.content_type,
         headers={ "Content-Disposition": f'inline; filename="{metadata.filename}"'}
     )
+
+@router.delete("/documents/{file_id}")
+async def remove_document(file_id: str, user=Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    await delete_document(file_id, user["id"], db)
+    return { "message": "Deleted document successfully"}

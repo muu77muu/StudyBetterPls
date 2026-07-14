@@ -3,7 +3,7 @@ import zstandard as zstd
 
 from botocore.exceptions import ClientError
 from fastapi import HTTPException
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.filemetadata_model import FileMetadata
@@ -52,7 +52,6 @@ async def list_notes(clerk_user_id: str, db: AsyncSession):
         for f in result.scalars().all()
     ]
 
-
 async def get_document(file_id: str, clerk_user_id: str, db: AsyncSession):
     result = await db.execute(
         select(FileMetadata).where(
@@ -81,3 +80,29 @@ async def get_document(file_id: str, clerk_user_id: str, db: AsyncSession):
         body = zstd.ZstdDecompressor().decompress(body)
 
     return metadata, BytesIO(body)
+
+async def delete_document(file_id: str, clerk_user_id: str, db: AsyncSession):
+    result = await db.execute(
+        select(FileMetadata).where(
+            FileMetadata.id == file_id,
+            FileMetadata.clerk_user_id == clerk_user_id,
+        )
+    )
+
+    metadata = result.scalar_one_or_none()
+
+    if metadata is None:
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    try: 
+        async with (await get_r2_client()) as r2:
+            await r2.delete_object(
+                Bucket=BUCKET,
+                Key=metadata.r2_key,
+            )
+    except ClientError:
+        raise HTTPException(status_code=500, detail="Failed to delete from storage")
+    
+    await db.delete(metadata)
+    await db.commit()
+

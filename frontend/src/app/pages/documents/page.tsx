@@ -56,6 +56,31 @@ export default function DocumentsPage() {
     }
   }
 
+  async function deleteDocument(id: string) {
+    
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this document?"
+    );
+    if (!confirmed) return;
+
+    try {
+      const response = await fetch(`/api/documents/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete document");
+      }
+
+      setData((prev) => ({
+        media: prev.media.filter((f) => f.id !== id),
+        notes: prev.notes.filter((f) => f.id !== id),
+      }));
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   function isValidImage(filename: string) {
     const ext = filename.split(".").pop()?.toLowerCase();
     return ext ? imageExtensions.has(ext) : false;
@@ -155,14 +180,23 @@ export default function DocumentsPage() {
                     </div>
                   </div>
 
-                  <a
-                    href={`/api/documents/${file.id}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="open-button"
-                  >
-                    Open →
-                  </a>
+                  <div className="card-actions">
+                    <a
+                      href={`/api/documents/${file.id}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="open-button"
+                    >
+                      Open ↗
+                    </a>
+
+                    <button
+                      className="delete-button"
+                      onClick={() => deleteDocument(file.id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               ))}
           </div>
@@ -200,14 +234,23 @@ export default function DocumentsPage() {
                     </div>
                   </div>
 
-                  <a
-                    href={`/api/documents/${file.id}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="open-button"
-                  >
-                    Open →
-                  </a>
+                  <div className="card-actions">
+                    <a
+                      href={`/api/documents/${file.id}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="open-button"
+                    >
+                      Open ↗
+                    </a>
+
+                    <button
+                      className="delete-button"
+                      onClick={() => deleteDocument(file.id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               ))}
           </div>
