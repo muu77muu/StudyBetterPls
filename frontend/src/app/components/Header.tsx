@@ -7,7 +7,11 @@ import "@/app/styles/header.css";
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { isSignedIn } = useAuth();
+  const { isSignedIn, isLoaded } = useAuth();
+
+  if (!isLoaded) {
+    return null;
+  }
 
   if (!isSignedIn) {
     return null;
