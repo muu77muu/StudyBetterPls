@@ -6,6 +6,27 @@ import "@/app/styles/upload.css";
 
 const MAX_FILE_SIZE_MB = 20;
 
+const ALLOWED_NOTES = [
+    "application/pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/msword",
+    "text/plain",
+    "text/markdown",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "application/vnd.ms-powerpoint",
+    "text/csv",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+];
+
+const ALLOWED_MEDIA = [
+    "audio/mp4",
+    "audio/wav",
+    "audio/ogg",
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+];
+
 export default function UploadPage() {
     const { getToken } = useAuth();
 
@@ -66,21 +87,31 @@ export default function UploadPage() {
     }
 
     function validateFile(
-        e: React.ChangeEvent<HTMLInputElement>,
-        setter: (file: File | null) => void
-    ) {
-        if (!e.target.files) return;
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: "media" | "notes",
+    setter: (file: File | null) => void
+) {
+    const selected = e.target.files?.[0];
 
-        const selected = e.target.files[0];
+    if (!selected) return;
 
-        if (selected.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
-            alert(`File size exceeds ${MAX_FILE_SIZE_MB}MB.`);
-            return;
-        }
+    const allowed = type === "media" ? ALLOWED_MEDIA : ALLOWED_NOTES;
 
-        setter(selected);
-        setMessage("");
+    if (!allowed.includes(selected.type)) {
+        alert("Unsupported file type.");
+        e.target.value = "";
+        return;
     }
+
+    if (selected.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+        alert(`File size exceeds ${MAX_FILE_SIZE_MB}MB.`);
+        e.target.value = "";
+        return;
+    }
+
+    setter(selected);
+    setMessage("");
+}
 
     return (
         <main className="upload-page">
@@ -99,9 +130,7 @@ export default function UploadPage() {
                         <div className="upload-icon">📹</div>
                         <div>
                             <h2>Media</h2>
-                            <p>
-                                Videos, audio recordings, images, presentations and
-                                other learning resources.
+                            <p>Audio recordings, images, and voice notes.
                             </p>
                         </div>
                     </div>
@@ -110,25 +139,21 @@ export default function UploadPage() {
                         id="media-upload"
                         type="file"
                         className="hidden-file-input"
+                        accept="
+                            audio/mpeg,
+                            audio/mp4,
+                            audio/wav,
+                            audio/ogg,
+                            image/jpeg,
+                            image/png,
+                            image/webp
+                        "
                         onChange={(e) => {
-                            if (!e.target.files) return;
-
-                            const selectedFile = e.target.files[0];
-                            if (
-                                selectedFile.size >
-                                MAX_FILE_SIZE_MB * 1024 * 1024
-                            ) {
-                                alert(
-                                    `File size exceeds ${MAX_FILE_SIZE_MB}MB.`
-                                );
-                                return;
-                            }
-
-                            setMediaFile(selectedFile);
-                            setMessage("");
+                            validateFile(e, "media", setMediaFile)
                         }}
                     />
 
+                    <p><i>Files format accepted: .jpg, .jpeg, .png, .webp, .wav, .ogg, .mp3, .mp4 (audio only)</i></p>
                     <label
                         htmlFor="media-upload"
                         className="upload-dropzone"
@@ -169,10 +194,7 @@ export default function UploadPage() {
                         <div className="upload-icon">📝</div>
                         <div>
                             <h2>Notes</h2>
-                            <p>
-                                Lecture notes, PDFs, handwritten notes and study
-                                materials.
-                            </p>
+                            <p>Lecture notes, powerpoints, sheets, and study materials.</p>
                         </div>
                     </div>
 
@@ -180,11 +202,23 @@ export default function UploadPage() {
                         id="notes-upload"
                         type="file"
                         className="hidden-file-input"
+                        accept="
+                            .pdf,
+                            .doc,
+                            .docx,
+                            .txt,
+                            .md,
+                            .ppt,
+                            .pptx,
+                            .csv,
+                            .xlsx
+                        "
                         onChange={(e) =>
-                            validateFile(e, setNotesFile)
+                            validateFile(e, "notes", setNotesFile)
                         }
                     />
 
+                    <p><i>Files format accepted: .pdf, .docx, .doc, .txt, .md, .pptx, .ppt, .csv, .xlsx</i></p>
                     <label
                         htmlFor="notes-upload"
                         className="upload-dropzone"
@@ -193,6 +227,7 @@ export default function UploadPage() {
                         <strong>Select Notes</strong>
                         <small>Click to browse your device</small>
                     </label>
+
 
                     <div className="upload-file-display">
                         {notesFile ? (
@@ -218,6 +253,7 @@ export default function UploadPage() {
                             ? "Uploading..."
                             : "Upload Notes"}
                     </button>
+
                 </div>
             </section>
 

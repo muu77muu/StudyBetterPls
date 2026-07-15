@@ -4,18 +4,46 @@ from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import zstandard as zstd
+import filetype
 
 from app.storage.r2 import (get_r2_client, BUCKET)
 from app.models.filemetadata_model import FileMetadata
 
 MAX_FILE_SIZE = 20 * 1024 * 1024  # 20MB
 
+ALLOWED_NOTES_TYPES = {
+    "application/pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",  # docx
+    "application/msword",                                                       # doc
+    "text/plain",
+    "text/markdown",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation",# pptx
+    "application/vnd.ms-powerpoint",                                            # ppt
+    "text/csv",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",        # xlsx
+}
+
+ALLOWED_MEDIA_TYPES = {
+    "audio/mpeg",
+    "audio/mp4",
+    "audio/wav",
+    "audio/ogg",
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+}
+
 COMPRESSIBLE_TYPES = {
     "application/pdf",
     "text/plain",
+    "text/markdown",
     "text/csv",
     "application/json",
     "application/xml",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.ms-powerpoint",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
 }
 
 async def delete_r2_object(key: str):
@@ -29,6 +57,38 @@ def compress_file(contents: bytes):
     compressor = zstd.ZstdCompressor(level=10)
     return compressor.compress(contents)
 
+def validate_file(contents: bytes, upload_type: str, declared_type: str):
+    file_kind = filetype.guess(contents)
+
+    if upload_type == "notes":
+        allowed = ALLOWED_NOTES_TYPES
+    elif upload_type == "media":
+        allowed = ALLOWED_MEDIA_TYPES
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid upload type."
+        )
+
+    if file_kind is not None:
+        detected = file_kind.mime
+
+        if detected not in allowed:
+            raise HTTPException(
+                status_code=415,
+                detail=f"Unsupported file type ({detected})."
+            )
+
+        return detected
+
+    if declared_type in allowed:
+        return declared_type
+
+    raise HTTPException(
+        status_code=415,
+        detail="Unsupported or corrupted file."
+    )
+
 async def upload_file(file, type: str, clerk_user_id: str, db: AsyncSession):
 
     if file.size > MAX_FILE_SIZE:
@@ -40,9 +100,9 @@ async def upload_file(file, type: str, clerk_user_id: str, db: AsyncSession):
     contents = await file.read()
     await file.seek(0)  # Reset the file pointer to the beginning after reading
     original_size = len(contents)
+    validated_type = validate_file(contents, type, file.content_type)
 
     compression = None
-    extension = ""
     upload_body = contents
 
     if file.content_type in COMPRESSIBLE_TYPES:
@@ -50,7 +110,6 @@ async def upload_file(file, type: str, clerk_user_id: str, db: AsyncSession):
         if len(compressed_contents) < original_size:
             upload_body = compressed_contents
             compression = "zstd"
-            extension = ".zst"
 
     safe_filename = file.filename.replace("/", "_")
 
@@ -70,7 +129,7 @@ async def upload_file(file, type: str, clerk_user_id: str, db: AsyncSession):
                 Bucket=BUCKET,
                 Key=key,
                 ContentType=(
-                    "application/zstd" if compression == "zstd" else file.content_type
+                    "application/zstd" if compression == "zstd" else validated_type
                 ),
                 Metadata={
                     "original-filename": safe_filename,
