@@ -3,11 +3,17 @@ import { clerkMiddleware } from "@clerk/nextjs/server";
 export default clerkMiddleware(async (auth, req) => {
   const { pathname } = req.nextUrl;
 
-  const isPublicRoute =
-    pathname.startsWith("/login") ||
-    pathname.startsWith("/api/public");
+  const publicRoutes = [
+    "/",
+    "/pages/login",
+    "/pages/signup"
+  ];
 
-  if (!isPublicRoute) {
+  const isPublic = publicRoutes.some((route) =>
+    pathname === route || pathname.startsWith(`${route}/`)
+  );
+
+  if (!isPublic) {
     await auth.protect();
   }
 });

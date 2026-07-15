@@ -1,10 +1,10 @@
-import { SignIn } from "@clerk/nextjs";
+import { SignUp } from "@clerk/nextjs";
 
-export default function LoginPage() {
+export default function SignUpPage() {
   return (
     <div className="flex min-h-screen items-center justify-center">
-      <SignIn
-        path="/pages/login"
+      <SignUp
+        path="/pages/signup"
         routing="path"
       />
     </div>
