@@ -16,9 +16,11 @@ export default function RootLayout({
 }) {
   return (
     <ClerkProvider
-      signInUrl="/pages/login"
       signUpUrl="/pages/signup"
+      signInUrl="/pages/login"
       afterSignOutUrl="/pages/login"
+      signInForceRedirectUrl="/pages/dashboard"
+      signUpForceRedirectUrl="/pages/dashboard"
     >
       <html lang="en">
         <body>

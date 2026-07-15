@@ -1,0 +1,273 @@
+.documents {
+    max-width: 1200px;
+    margin: auto;
+    padding: 3rem 2rem;
+}
+
+.hero {
+    margin-bottom: 2.5rem;
+}
+
+.hero h1 {
+    font-size: 2.2rem;
+    margin-bottom: .5rem;
+}
+
+.hero p {
+    color: #64748b;
+    max-width: 650px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 3rem;
+}
+
+.stat-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    padding: 1.5rem;
+    transition: .25s;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(0,0,0,.08);
+}
+
+.stat-card h2 {
+    margin: 0;
+    font-size: 2rem;
+}
+
+.stat-card p {
+    margin-top: .5rem;
+    color: #64748b;
+}
+
+.document-section {
+    margin-bottom: 3rem;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+}
+
+.section-header h2 {
+    margin: 0;
+}
+
+.section-header span {
+    color: #64748b;
+    font-size: .95rem;
+}
+
+.document-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.document-card {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    padding: 1rem 1.25rem;
+
+    transition: .25s;
+}
+
+.document-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 32px rgba(0,0,0,.08);
+}
+
+.preview {
+    width: 80px;
+    height: 80px;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #f8fafc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.file-icon {
+    font-size: 2.2rem;
+}
+
+.document-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.document-info h3 {
+    margin: 0 0 .45rem;
+    font-size: 1.05rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.meta {
+    display: flex;
+    gap: .5rem;
+    align-items: center;
+    flex-wrap: wrap;
+    color: #64748b;
+    font-size: .92rem;
+}
+
+.open-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: .55rem 1rem;
+    background: #2563eb;
+    color: white;
+    border: 1px solid #2563eb;
+    border-radius: 12px;
+    font-weight: 600;
+    text-decoration: none;
+
+    transition: .25s;
+}
+
+.open-button:hover {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+    text-decoration: none;
+
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, .18);
+}
+
+.open-button:active {
+    transform: translateY(0);
+}
+
+.empty-state {
+    background: white;
+    border: 1px dashed #cbd5e1;
+    border-radius: 16px;
+    padding: 2.5rem;
+    text-align: center;
+}
+
+.empty-state h3 {
+    margin-top: 0;
+}
+
+.empty-state p {
+    color: #64748b;
+    margin-bottom: 0;
+}
+
+.loading-state {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 50vh;
+    color: #64748b;
+}
+
+.card-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: .75rem;
+}
+
+.delete-button {
+    background: white;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+    border-radius: 12px;
+    padding: .55rem 1rem;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+
+    transition: .25s;
+}
+
+.delete-button:hover {
+    background: #fef2f2;
+    border-color: #f87171;
+
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(220, 38, 38, .12);
+}
+
+.delete-button:active {
+    transform: translateY(0);
+}
+
+.delete-button:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* ############################################################
+   Mobile
+############################################################ */
+
+@media (max-width: 768px) {
+
+    .documents {
+        padding: 2rem 1rem;
+    }
+
+    .document-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .preview {
+        width: 100%;
+        height: 180px;
+    }
+
+    .document-info {
+        width: 100%;
+    }
+
+    .document-info h3 {
+        white-space: normal;
+    }
+
+    .meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: .2rem;
+    }
+
+    .open-button {
+        width: 100%;
+        margin-top: .75rem;
+    }
+
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: .25rem;
+    }
+}

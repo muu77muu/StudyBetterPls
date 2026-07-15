@@ -1,7 +1,9 @@
+from typing import Literal
 from fastapi import (
     APIRouter,
     UploadFile,
     File,
+    Form,
     Depends,
 )
 
@@ -16,12 +18,14 @@ router = APIRouter()
 @router.post("/upload")
 async def upload(
     file: UploadFile = File(...),
+    type: Literal["media", "notes"] = Form(...),
     user=Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
 
     record = await upload_file(
         file=file,
+        type=type,
         clerk_user_id=user["id"],
         db=db,
     )

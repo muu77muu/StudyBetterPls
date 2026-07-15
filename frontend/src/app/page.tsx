@@ -1,17 +1,13 @@
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Show, UserButton } from "@clerk/nextjs";
 
-export default function HomePage() {
-  return (
-    <main>
-      <Show when="signed-out">
-        <Link href="/pages/login">Login</Link>
-      </Show>
+export default async function HomePage() {
+    const { userId } = await auth();
 
-      <Show when="signed-in">
-        <UserButton />
-        <Link href="/pages/dashboard">Dashboard</Link>
-      </Show>
-    </main>
-  );
+    if (userId) {
+      redirect("/pages/dashboard");
+    } else {
+      redirect("/pages/login")
+    }
 }
